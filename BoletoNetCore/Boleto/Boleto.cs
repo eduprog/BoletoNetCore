@@ -79,8 +79,6 @@ namespace BoletoNetCore
         public bool ImprimirValoresAuxiliares { get; set; } = false;        
         public decimal ValorPago { get; set; } // ValorPago deve ser preenchido com o valor que o pagador pagou. Se não existir essa informação no arquivo retorno, deixar zerada.
         public decimal ValorPagoCredito { get; set; } // ValorPagoCredito deve ser preenchido com o valor que será creditado na conta corrente. Se não existir essa informação no arquivo retorno, deixar zerada.
-        public decimal ValorJurosDia { get; set; }
-        public decimal ValorMulta { get; set; }
         public decimal ValorDesconto { get; set; }
         public decimal ValorTarifas { get; set; }
         public decimal ValorOutrasDespesas { get; set; }
@@ -89,6 +87,8 @@ namespace BoletoNetCore
         public decimal ValorAbatimento { get; set; }
 
         // Juros
+        public decimal ValorJurosDia { get; set; }
+       
         public decimal PercentualJurosDia { get; set; }
 
         public DateTime DataJuros { get; set; }
@@ -96,6 +96,8 @@ namespace BoletoNetCore
         public TipoJuros TipoJuros { get; set; } = TipoJuros.Isento;
 
         // Multa
+        public decimal ValorMulta { get; set; }
+
         public decimal PercentualMulta { get; set; }
 
         public DateTime DataMulta { get; set; }
@@ -208,11 +210,21 @@ namespace BoletoNetCore
         public string MensagemArquivoRemessa { get; set; } = string.Empty;
         public string RegistroArquivoRetorno { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Quantidade de dias para recebimento após o vencimento (exclusivo BB / Caixa)
+        /// Prazo permitido para recebimento do boleto após o vencimento. Após este prazo, o boleto será baixado.
+        /// (BB) Este registro deve ser utilizado somente quando o campo 21.2 (Carteira de Cobrança) – Comando – for igual a "01" - Registro de Título
+        /// (BB) Este Registro deve, obrigatoriamente, ser inserido após o Registro Detalhe Obrigatório correspondente ao título
+        /// </summary>
+        public int? DiasLimiteRecebimento { get; set; } = null;
+        public int Distribuicao { get; set; } = 0;
+
         public IBanco Banco { get; set; }
         public Pagador Pagador { get; set; } = new Pagador();
         public Pagador Avalista { get; set; } = new Pagador();
         public CodigoBarra CodigoBarra { get; } = new CodigoBarra();
         public ObservableCollection<GrupoDemonstrativo> Demonstrativos { get; } = new ObservableCollection<GrupoDemonstrativo>();
+        public string ParcelaInformativo { get; set; } = string.Empty;
 
         public void ValidarDados()
         {
