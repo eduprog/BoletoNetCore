@@ -1,3 +1,4 @@
+using BoletoNetCore.Enums;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -76,7 +77,7 @@ namespace BoletoNetCore
         // Valores do Boleto
         public decimal ValorTitulo { get; set; }
 
-        public bool ImprimirValoresAuxiliares { get; set; } = false;        
+        public bool ImprimirValoresAuxiliares { get; set; } = false;
         public decimal ValorPago { get; set; } // ValorPago deve ser preenchido com o valor que o pagador pagou. Se não existir essa informação no arquivo retorno, deixar zerada.
         public decimal ValorPagoCredito { get; set; } // ValorPagoCredito deve ser preenchido com o valor que será creditado na conta corrente. Se não existir essa informação no arquivo retorno, deixar zerada.
         public decimal ValorDesconto { get; set; }
@@ -85,10 +86,12 @@ namespace BoletoNetCore
         public decimal ValorOutrosCreditos { get; set; }
         public decimal ValorIOF { get; set; }
         public decimal ValorAbatimento { get; set; }
+        public decimal ValorDesconto2 { get; set; }
+        public decimal ValorDesconto3 { get; set; }
 
         // Juros
         public decimal ValorJurosDia { get; set; }
-       
+
         public decimal PercentualJurosDia { get; set; }
 
         public DateTime DataJuros { get; set; }
@@ -102,8 +105,16 @@ namespace BoletoNetCore
 
         public DateTime DataMulta { get; set; }
 
+        /// <summary>
+        /// Código adotado para identificar o critério de pagamento de multa(valor, percentual ou sem cobrançã de multa), a ser aplicada pelo atraso do pagamento do Título.
+        /// </summary>
+        //TODO: Precisa ajustar os arquivos de remessa dos bancos para usar essa propriedade, que informa o critério de pagamento de multa. Cecred/Ailos (085) - Carteira 1 ajustado
+        public TipoCodigoMulta TipoCodigoMulta { get; set; } = TipoCodigoMulta.Valor;
+
         // Desconto
         public DateTime DataDesconto { get; set; }
+        public DateTime DataDesconto2 { get; set; }
+        public DateTime DataDesconto3 { get; set; }
 
         /// <summary>
         /// Identificação se emite Boleto para Debito Automatico
@@ -129,7 +140,7 @@ namespace BoletoNetCore
         /// Banco no qual o boleto/título foi quitado/recolhido
         /// </summary>
         public string BancoCobradorRecebedor { get; set; }
-        
+
         /// <summary>
         /// Agência na qual o boleto/título foi quitado/recolhido
         /// </summary>
@@ -208,6 +219,8 @@ namespace BoletoNetCore
         public string MensagemInstrucoesCaixa { get; set; } = string.Empty;
         public string MensagemInstrucoesCaixaFormatado { get; set; } = string.Empty;
         public string MensagemArquivoRemessa { get; set; } = string.Empty;
+        public string MensagemProtesto { get; set; } = string.Empty;
+        public string MensagemLivre { get; set; } = string.Empty;
         public string RegistroArquivoRetorno { get; set; } = string.Empty;
 
         /// <summary>
@@ -225,6 +238,7 @@ namespace BoletoNetCore
         public CodigoBarra CodigoBarra { get; } = new CodigoBarra();
         public ObservableCollection<GrupoDemonstrativo> Demonstrativos { get; } = new ObservableCollection<GrupoDemonstrativo>();
         public string ParcelaInformativo { get; set; } = string.Empty;
+        public string ByteNossoNumero { get; set; } = "2";
 
         public void ValidarDados()
         {

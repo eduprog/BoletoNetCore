@@ -158,20 +158,24 @@ namespace BoletoNetCore
         {
             try
             {
-                if (boleto.ValorMulta == 0)
+                if (boleto.ValorMulta == 0 && boleto.PercentualMulta == 0)
                     return "";
+                
+                var valorOuPercentualMulta = boleto.TipoCodigoMulta == Enums.TipoCodigoMulta.Valor ? boleto.ValorMulta : boleto.PercentualMulta;
+
                 numeroRegistroGeral++;
                 var reg = new TRegistroEDI();
                 reg.Adicionar(TTiposDadoEDI.ediNumericoSemSeparador_, 0001, 001, 0, "5", '0');
                 reg.Adicionar(TTiposDadoEDI.ediNumericoSemSeparador_, 0002, 002, 0, "99", '0');
-                reg.Adicionar(TTiposDadoEDI.ediNumericoSemSeparador_, 0004, 001, 0, "1", '0');
+                reg.Adicionar(TTiposDadoEDI.ediNumericoSemSeparador_, 0004, 001, 0, (int)boleto.TipoCodigoMulta, '0');
                 reg.Adicionar(TTiposDadoEDI.ediDataDDMMAA___________, 0005, 006, 0, boleto.DataMulta, ' ');
-                reg.Adicionar(TTiposDadoEDI.ediNumericoSemSeparador_, 0011, 012, 2, boleto.ValorMulta, '0');
+                reg.Adicionar(TTiposDadoEDI.ediNumericoSemSeparador_, 0011, 012, 2, valorOuPercentualMulta, '0');
                 reg.Adicionar(TTiposDadoEDI.ediAlphaAliDireita______, 0023, 003, 0, boleto.DiasLimiteRecebimento.HasValue ? boleto.DiasLimiteRecebimento.Value.ToString("000") : string.Empty, ' ');
                 reg.Adicionar(TTiposDadoEDI.ediAlphaAliEsquerda_____, 0026, 369, 0, string.Empty, ' ');
                 reg.Adicionar(TTiposDadoEDI.ediNumericoSemSeparador_, 0395, 006, 0, numeroRegistroGeral, '0');
                 reg.CodificarLinha();
                 return reg.LinhaRegistro;
+                    
             }
             catch (Exception ex)
             {
@@ -200,6 +204,30 @@ namespace BoletoNetCore
         #endregion
 
         #region Retorno - CNAB400
+
+        public override void LerHeaderRetornoCNAB400(string registro)
+        {
+            try
+            {
+                if (registro.Substring(0, 9) != "02RETORNO")
+                    throw new Exception("O arquivo não é do tipo \"02RETORNO\"");
+
+                this.Beneficiario = new Beneficiario();
+                this.Beneficiario.ContaBancaria = new ContaBancaria();
+
+                this.Beneficiario.ContaBancaria.Agencia = registro.Substring(26, 4);
+                this.Beneficiario.ContaBancaria.DigitoAgencia = registro.Substring(30, 1);
+                this.Beneficiario.ContaBancaria.Conta = registro.Substring(31, 8);
+                this.Beneficiario.ContaBancaria.DigitoConta = registro.Substring(39, 1);
+                this.Beneficiario.Nome = registro.Substring(46, 30).Trim();
+                
+                this.Beneficiario.Codigo = registro.Substring(149, 7).Trim();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Erro ao ler HEADER do arquivo de RETORNO / CNAB 400.", ex);
+            }
+        }
 
         public void LerDetalheRetornoCNAB400Segmento1(ref Boleto boleto, string registro)
         {
@@ -305,6 +333,8 @@ namespace BoletoNetCore
                     return TipoEspecieDocumento.DAE;
                 case "27":
                     return TipoEspecieDocumento.DAM;
+                case "32":
+                    return TipoEspecieDocumento.BP;
                 default:
                     return TipoEspecieDocumento.OU;
             }
@@ -338,6 +368,8 @@ namespace BoletoNetCore
                     return "26";
                 case TipoEspecieDocumento.DAM:
                     return "27";
+                case TipoEspecieDocumento.BP:
+                    return "32";
                 default:
                     return "99";
             }

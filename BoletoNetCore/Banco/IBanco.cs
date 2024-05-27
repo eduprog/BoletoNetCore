@@ -16,6 +16,21 @@ namespace BoletoNetCore
         bool RemoveAcentosArquivoRemessa { get; }
 
         /// <summary>
+        /// Define quantos digitos sao usados para a agencia no arquivo de remessa/retorno
+        /// </summary>
+        int TamanhoAgencia { get; }
+
+        /// <summary>
+        /// Define quantos digitos sao usados para o numero da conta no arquivo de remessa/retorno
+        /// </summary>
+        int TamanhoConta { get; }
+
+        /// <summary>
+        /// Define se o arquivo CNAB é de desconto de duplicatas
+        /// </summary>
+        bool DescontoDuplicatas { get; }
+
+        /// <summary>
         /// Formata o benefici�rio (Ag�ncia, Conta, C�digo)
         /// </summary>
         void FormataBeneficiario();
@@ -41,6 +56,11 @@ namespace BoletoNetCore
         /// Gera o Trailer do arquivo de remessa
         /// </summary>
         string GerarDetalheRemessa(TipoArquivo tipoArquivo, Boleto boleto, ref int numeroRegistro);
+
+        /// <summary>
+        /// Registra a mensagem de preotesto ou mensagem livre na remessa.
+        /// </summary>
+        string GerarMensagemRemessa(TipoArquivo tipoArquivo, Boleto boleto, ref int numeroRegistro);
 
         /// <summary>
         /// Gera o Trailer do arquivo de remessa
@@ -71,6 +91,7 @@ namespace BoletoNetCore
 
         //retorno
         void LerHeaderRetornoCNAB400(string registro);
+        void CompletarHeaderRetornoCNAB400(string registro);
         void LerDetalheRetornoCNAB400Segmento1(ref Boleto boleto, string registro);
         void LerDetalheRetornoCNAB400Segmento7(ref Boleto boleto, string registro);
         void LerTrailerRetornoCNAB400(string registro);
